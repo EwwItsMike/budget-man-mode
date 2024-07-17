@@ -93,7 +93,6 @@ public class BudgetOverlay extends Overlay {
                         tooltipManager.add(new Tooltip(ColorUtil.prependColorTag(text, new Color(0, 190, 0))));
                     } else {
                         tooltipManager.add(new Tooltip(ColorUtil.prependColorTag(text, new Color(190, 0 , 0))));
-                        // TODO: remove equip/wield option on the item (or set first option to USE)
                         removeEquipOption(entry);
                     }
                 }
