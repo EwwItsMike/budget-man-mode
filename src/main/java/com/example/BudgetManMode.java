@@ -1,23 +1,18 @@
 package com.example;
 
-import java.util.ArrayList;
-import java.util.List;
 import javax.inject.Inject;
 
 import com.google.inject.Provides;
 import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.*;
 import net.runelite.api.events.GameStateChanged;
+import net.runelite.api.events.GameTick;
 import net.runelite.client.config.ConfigManager;
-import net.runelite.api.events.MenuEntryAdded;
-import net.runelite.api.widgets.WidgetID;
-import net.runelite.api.widgets.WidgetInfo;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.ui.overlay.OverlayManager;
-import net.runelite.client.util.Text;
 
 @Slf4j
 @PluginDescriptor(
@@ -31,7 +26,8 @@ public class BudgetManMode extends Plugin
 
 	@Inject
 	private ItemManager itemManager;
-	private Integer wornItemsValue = 0;
+	private long wornItemsValue = 0;
+	private long maxAllowedValue = 0;
 	private boolean initialValueLoaded = false;
 
 	@Inject
@@ -69,7 +65,7 @@ public class BudgetManMode extends Plugin
 		if (gameStateChanged.getGameState() == GameState.LOGGED_IN
 			&& !initialValueLoaded)
 		{
-			initValue();
+			setValues();
 			initialValueLoaded = true;
 		} else if (gameStateChanged.getGameState() == GameState.LOGIN_SCREEN) {
 			wornItemsValue = 0;
@@ -77,14 +73,24 @@ public class BudgetManMode extends Plugin
 		}
 	}
 
-	private void initValue() {
+	private void setValues() {
+		maxAllowedValue = client.getOverallExperience();
+
 		wornItemsValue = 0;
 		Item[] equipped = client.getItemContainer(InventoryID.EQUIPMENT).getItems();
 
 		for (Item i : equipped){
-			wornItemsValue += itemManager.getItemPrice(i.getId()) * i.getQuantity();
+			wornItemsValue += ((long) itemManager.getItemPrice(i.getId()) * i.getQuantity());
 		}
 
-		System.out.println("Initial equipped value loaded. Value set at: " + wornItemsValue);
+	}
+
+	@Subscribe
+	public void onGameTick(GameTick event) {
+		setValues();
+	}
+
+	public long getRemainingAllowedValue(){
+		return maxAllowedValue - wornItemsValue;
 	}
 }

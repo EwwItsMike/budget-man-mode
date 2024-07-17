@@ -88,7 +88,7 @@ public class BudgetOverlay extends Overlay {
                 if (text != null)
                 {
                     String cleanValue = text.replaceAll(",", "").replace(" GP", "");
-                    if (Integer.parseInt(cleanValue) >= 0){
+                    if (Long.parseLong(cleanValue) < plugin.getRemainingAllowedValue()){
                         tooltipManager.add(new Tooltip(ColorUtil.prependColorTag(text, new Color(0, 190, 0))));
                     } else {
                         tooltipManager.add(new Tooltip(ColorUtil.prependColorTag(text, new Color(190, 0 , 0))));
@@ -132,7 +132,7 @@ public class BudgetOverlay extends Overlay {
             currentlyEquippedPrice = getItemPriceFromContainer(c, slot);
         }
 
-        return currentlyEquippedPrice - (itemManager.getItemPrice(item.getId()) * item.getQuantity());
+        return (itemManager.getItemPrice(item.getId()) * item.getQuantity()) - currentlyEquippedPrice;
     }
 
     private int getItemPriceFromContainer(ItemContainer container, int slotID) {
