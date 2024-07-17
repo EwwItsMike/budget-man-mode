@@ -180,8 +180,8 @@ class ItemPricesOverlay extends Overlay
         }
 
         //Set hovered item cost to the ge price of the item we are hovering over
-        BudgetManMode.hoveredItemCost = gePrice;
-        System.out.println(BudgetManMode.hoveredItemCost);
+//        BudgetManMode.hoveredItemCost = gePrice;
+//        System.out.println(BudgetManMode.hoveredItemCost);
 
         return null;
     }

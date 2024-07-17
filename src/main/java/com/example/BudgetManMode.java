@@ -32,99 +32,89 @@ public class BudgetManMode extends Plugin
 	@Inject
 	private ItemManager itemManager;
 	private Integer wornItemsValue = 0;
-	public static Integer hoveredItemCost = 0;
+	private boolean initialValueLoaded = false;
 
 	@Inject
 	private OverlayManager overlayManager;
 
 	@Inject
-	private ItemPricesOverlay overlay;
-
-	@com.google.inject.Inject
 	private BudgetManConfig config;
+
+	@Inject
+	private BudgetOverlay overlay;
+
+	@Provides
+	BudgetManConfig provideConfig(ConfigManager configManager)
+	{
+		return configManager.getConfig(BudgetManConfig.class);
+	}
 
 	@Override
 	protected void startUp() throws Exception
 	{
-		log.info("Budget Man Mode started!");
+		System.out.println("Budget Man Mode started!");
 		overlayManager.add(overlay);
 	}
 
 	@Override
 	protected void shutDown() throws Exception
 	{
-		log.info("Budget Man Mode stopped!");
+		System.out.println("Budget Man Mode stopped!");
 		overlayManager.remove(overlay);
-	}
-
-	public int getHoveredPriceDifference() {
-		// learn the item slot of the hovered over item
-
-		// check if we have an item in that slot equipped
-
-		// if yes, then calculate the price difference of the hovered over item in comparison to our equipped item
-
-		// output the difference
-		return 0;
-	}
-
-	public void test() {
-		wornItemsValue = 0;
-
-		Item[] equipped = client.getItemContainer(InventoryID.EQUIPMENT).getItems();
-
-		for (Item i : equipped) {
-			wornItemsValue += itemManager.getItemPrice(i.getId());
-		}
-
-		System.out.println(wornItemsValue);
-		System.out.println(client.getOverallExperience());
 	}
 
 	@Subscribe
 	public void onGameStateChanged(GameStateChanged gameStateChanged)
 	{
-		if (gameStateChanged.getGameState() == GameState.LOGGED_IN)
+		if (gameStateChanged.getGameState() == GameState.LOGGED_IN
+			&& !initialValueLoaded)
 		{
-			test();
+			initValue();
+			initialValueLoaded = true;
+		} else if (gameStateChanged.getGameState() == GameState.LOGIN_SCREEN) {
+			wornItemsValue = 0;
+			initialValueLoaded = false;
 		}
+	}
+
+	private void initValue() {
+		wornItemsValue = 0;
+		Item[] equipped = client.getItemContainer(InventoryID.EQUIPMENT).getItems();
+
+		for (Item i : equipped){
+			wornItemsValue += itemManager.getItemPrice(i.getId()) * i.getQuantity();
+		}
+
+		System.out.println("Initial equipped value loaded. Value set at: " + wornItemsValue);
 	}
 
 	@Subscribe
 	public void onMenuEntryAdded(MenuEntryAdded event)
 	{
-		test();
-
-		int groupId = WidgetInfo.TO_GROUP(event.getActionParam1());
-		if (WidgetID.INVENTORY_GROUP_ID != groupId)
-		{
-			return;
-		}
-
-		MenuEntry[] menuEntries = client.getMenuEntries();
-		List<MenuEntry> cleaned = new ArrayList<>();
-
-		for (MenuEntry entry : menuEntries)
-		{
-			String option = entry.getOption().toLowerCase();
-			String target = Text.removeTags(entry.getTarget());
-
-			// remove ability to wear or wield IF this item puts your total value of worn items above your total XP.
-			if ((wornItemsValue + getHoveredPriceDifference() > client.getOverallExperience()) && ("wear".equalsIgnoreCase(option) || "wield".equalsIgnoreCase(option)))
-			{
-				continue;
-			}
-			else
-			{
-				cleaned.add(entry);
-			}
-		}
-		client.setMenuEntries(cleaned.toArray(new MenuEntry[0]));
-	}
-
-	@Provides
-	BudgetManConfig provideConfig(ConfigManager configManager)
-	{
-		return configManager.getConfig(BudgetManConfig.class);
+//		int groupId = WidgetInfo.TO_GROUP(event.getActionParam1());
+//		if (WidgetID.INVENTORY_GROUP_ID != groupId)
+//		{
+//			return;
+//		}
+//
+//		MenuEntry[] menuEntries = client.getMenuEntries();
+//		List<MenuEntry> cleaned = new ArrayList<>();
+//
+//		for (MenuEntry entry : menuEntries)
+//		{
+//			String option = entry.getOption().toLowerCase();
+//			String target = Text.removeTags(entry.getTarget());
+//
+//			// remove ability to wear or wield IF this item puts your total value of worn items above your total XP.
+//			if ((wornItemsValue + getHoveredPriceDifference() > client.getOverallExperience()) && ("wear".equalsIgnoreCase(option) || "wield".equalsIgnoreCase(option)))
+//			{
+//				continue;
+//			}
+//			else
+//			{
+//				cleaned.add(entry);
+//			}
+//		}
+//		client.setMenuEntries(cleaned.toArray(new MenuEntry[0]));
 	}
 }
