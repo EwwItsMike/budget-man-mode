@@ -90,9 +90,13 @@ public class BudgetOverlay extends Overlay {
                 {
                     String cleanValue = text.replaceAll(",", "").replace(" GP", "");
                     if (Long.parseLong(cleanValue) < plugin.getRemainingAllowedValue()){
-                        tooltipManager.add(new Tooltip(ColorUtil.prependColorTag(text, new Color(0, 190, 0))));
+                        if (Long.parseLong(cleanValue) < 0){
+                            tooltipManager.add(new Tooltip(ColorUtil.prependColorTag(text, new Color(0, 190, 0))));
+                        } else {
+                            tooltipManager.add(new Tooltip(ColorUtil.prependColorTag("+" + text, new Color(238, 238, 238))));
+                        }
                     } else {
-                        tooltipManager.add(new Tooltip(ColorUtil.prependColorTag(text, new Color(190, 0 , 0))));
+                        tooltipManager.add(new Tooltip(ColorUtil.prependColorTag("+" + text, new Color(190, 0 , 0))));
                         removeEquipOption(entry);
                     }
                 }

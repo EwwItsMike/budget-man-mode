@@ -7,12 +7,19 @@ import lombok.extern.slf4j.Slf4j;
 import net.runelite.api.*;
 import net.runelite.api.events.GameStateChanged;
 import net.runelite.api.events.GameTick;
+import net.runelite.api.events.MenuEntryAdded;
+import net.runelite.api.events.MenuOpened;
+import net.runelite.api.widgets.ComponentID;
+import net.runelite.api.widgets.WidgetID;
+import net.runelite.api.widgets.WidgetInfo;
 import net.runelite.client.config.ConfigManager;
 import net.runelite.client.eventbus.Subscribe;
 import net.runelite.client.game.ItemManager;
 import net.runelite.client.plugins.Plugin;
 import net.runelite.client.plugins.PluginDescriptor;
 import net.runelite.client.ui.overlay.OverlayManager;
+
+import java.util.ArrayList;
 
 @Slf4j
 @PluginDescriptor(
@@ -29,6 +36,7 @@ public class BudgetManMode extends Plugin
 	private long wornItemsValue = 0;
 	private long maxAllowedValue = 0;
 	private boolean initialValueLoaded = false;
+//	private MenuE
 
 	@Inject
 	private OverlayManager overlayManager;
@@ -83,6 +91,40 @@ public class BudgetManMode extends Plugin
 			wornItemsValue += ((long) itemManager.getItemPrice(i.getId()) * i.getQuantity());
 		}
 
+	}
+
+
+	@Subscribe
+	public void onMenuOpened(MenuOpened event){
+		MenuEntry[] entries = client.getMenuEntries();
+		ArrayList<MenuEntry> cleaned = new ArrayList<>();
+		ItemContainer container = null;
+		MenuEntry entry = event.getFirstEntry();
+
+		final int widgetID = entry.getParam1();
+		if (widgetID == ComponentID.INVENTORY_CONTAINER || widgetID == ComponentID.BANK_INVENTORY_ITEM_CONTAINER) {
+			container = client.getItemContainer(InventoryID.INVENTORY);
+		}
+		if (container == null) return;
+
+
+
+		for (MenuEntry e : entries) {
+			final int index = e.getParam0();
+			final Item item = container.getItem(index);
+			if (item == null) return;
+
+			System.out.println("Checking entry: " + e.getOption());
+
+			if ((wornItemsValue + overlay.getHoveredPriceDifference(item)) > maxAllowedValue && (e.getOption().equalsIgnoreCase("wear") || e.getOption().equalsIgnoreCase("wield"))){
+				continue;
+			} else {
+				cleaned.add(e);
+				System.out.println("Adding entry to cleaned");
+
+			}
+		}
+		client.setMenuEntries(cleaned.toArray(new MenuEntry[0]));
 	}
 
 	@Subscribe
