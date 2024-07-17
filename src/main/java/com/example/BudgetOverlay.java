@@ -5,15 +5,20 @@ import net.runelite.api.widgets.ComponentID;
 import net.runelite.api.widgets.InterfaceID;
 import net.runelite.api.widgets.WidgetUtil;
 import net.runelite.client.game.ItemManager;
-import net.runelite.client.game.ItemStack;
 import net.runelite.client.ui.overlay.Overlay;
 import net.runelite.client.ui.overlay.OverlayPosition;
 import net.runelite.client.ui.overlay.tooltip.Tooltip;
 import net.runelite.client.ui.overlay.tooltip.TooltipManager;
 import net.runelite.client.util.ColorUtil;
 
+import net.runelite.http.api.item.ItemEquipmentStats;
+import net.runelite.http.api.item.ItemStats;
+
+
 import javax.inject.Inject;
 import java.awt.*;
+import java.text.NumberFormat;
+import java.util.Locale;
 
 // Base code sourced from Item Prices plugin
 public class BudgetOverlay extends Overlay {
@@ -82,10 +87,12 @@ public class BudgetOverlay extends Overlay {
                 final String text = makeTooltip(entry);
                 if (text != null)
                 {
-                    if (Integer.parseInt(text) >= 0){
+                    String cleanValue = text.replaceAll(",", "").replace(" GP", "");
+                    if (Integer.parseInt(cleanValue) >= 0){
                         tooltipManager.add(new Tooltip(ColorUtil.prependColorTag(text, new Color(0, 190, 0))));
                     } else {
                         tooltipManager.add(new Tooltip(ColorUtil.prependColorTag(text, new Color(190, 0 , 0))));
+                        // TODO: remove equip/wield option on the item (or set first option to USE)
                     }
                 }
         }
@@ -104,20 +111,32 @@ public class BudgetOverlay extends Overlay {
         final int index = entry.getParam0();
         final Item item = container.getItem(index);
         if (item != null) {
-            return getHoveredPriceDifference(item).toString();
+
+            String formattedNumber = NumberFormat.getNumberInstance(Locale.US).format(getHoveredPriceDifference(item));
+            return  formattedNumber + " GP";
         }
 
         return null;
     }
 
     public Integer getHoveredPriceDifference(Item item) {
-        // learn the item slot of the hovered over item
 
-        // check if we have an item in that slot equipped
+        int currentlyEquippedPrice = 0;
 
-        // if yes, then calculate the price difference of the hovered over item in comparison to our equipped item
+        final ItemStats stats = itemManager.getItemStats(item.getId(), false);
+        final ItemEquipmentStats current = stats.getEquipment();
 
-        // output the difference
-        return 0;
+        ItemContainer c = client.getItemContainer(InventoryID.EQUIPMENT);
+        if (stats.isEquipable() && current != null && c != null){
+            final int slot = current.getSlot();
+            currentlyEquippedPrice = getItemPriceFromContainer(c, slot);
+        }
+
+        return currentlyEquippedPrice - (itemManager.getItemPrice(item.getId()) * item.getQuantity());
+    }
+
+    private int getItemPriceFromContainer(ItemContainer container, int slotID) {
+        final Item item = container.getItem(slotID);
+        return item != null ? itemManager.getItemPrice(item.getId()) * item.getQuantity() : 0;
     }
 }

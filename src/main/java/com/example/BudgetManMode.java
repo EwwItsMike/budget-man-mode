@@ -87,34 +87,4 @@ public class BudgetManMode extends Plugin
 
 		System.out.println("Initial equipped value loaded. Value set at: " + wornItemsValue);
 	}
-
-	@Subscribe
-	public void onMenuEntryAdded(MenuEntryAdded event)
-	{
-//		int groupId = WidgetInfo.TO_GROUP(event.getActionParam1());
-//		if (WidgetID.INVENTORY_GROUP_ID != groupId)
-//		{
-//			return;
-//		}
-//
-//		MenuEntry[] menuEntries = client.getMenuEntries();
-//		List<MenuEntry> cleaned = new ArrayList<>();
-//
-//		for (MenuEntry entry : menuEntries)
-//		{
-//			String option = entry.getOption().toLowerCase();
-//			String target = Text.removeTags(entry.getTarget());
-//
-//			// remove ability to wear or wield IF this item puts your total value of worn items above your total XP.
-//			if ((wornItemsValue + getHoveredPriceDifference() > client.getOverallExperience()) && ("wear".equalsIgnoreCase(option) || "wield".equalsIgnoreCase(option)))
-//			{
-//				continue;
-//			}
-//			else
-//			{
-//				cleaned.add(entry);
-//			}
-//		}
-//		client.setMenuEntries(cleaned.toArray(new MenuEntry[0]));
-	}
 }
