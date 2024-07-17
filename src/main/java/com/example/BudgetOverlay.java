@@ -85,25 +85,46 @@ public class BudgetOverlay extends Overlay {
             case InterfaceID.BANK:
             case InterfaceID.BANK_INVENTORY:
                 // Make tooltip
-                final String text = makeTooltip(entry);
-                if (text != null)
+                final String hoveredItemPrice = makeTooltip(entry);
+                final String wornItemsPrice = NumberFormat.getNumberInstance(Locale.US).format(plugin.getWornItemsValue());
+                final String overallExperience = NumberFormat.getNumberInstance(Locale.US).format(client.getOverallExperience());
+                if (hoveredItemPrice != null)
                 {
-                    String cleanValue = text.replaceAll(",", "").replace(" GP", "");
-                    if (Long.parseLong(cleanValue) < plugin.getRemainingAllowedValue()){
-                        if (Long.parseLong(cleanValue) < 0){
-                            tooltipManager.add(new Tooltip(ColorUtil.prependColorTag(text, new Color(0, 190, 0))));
+                    String cleanHovered = hoveredItemPrice.replaceAll(",", "").replace("gp", "");
+
+                    Long newPrice = Long.parseLong(cleanHovered) + plugin.getWornItemsValue();
+                    String newPriceFormatted =  NumberFormat.getNumberInstance(Locale.US).format(newPrice);
+
+                    if (Long.parseLong(cleanHovered) < plugin.getRemainingAllowedValue()){
+                        if (Long.parseLong(cleanHovered) < 0){
+                            tooltipManager.add(new Tooltip(
+                                    ColorUtil.wrapWithColorTag(newPriceFormatted, new Color(238,238,238))
+                                            + ColorUtil.wrapWithColorTag(" (" + hoveredItemPrice + ")", new Color(0, 190, 0))
+                                            + ColorUtil.wrapWithColorTag("</br>/" + NumberFormat.getNumberInstance(Locale.US).format(client.getOverallExperience()) + " xp", new Color(165, 165, 165))
+                            ));
                         } else {
-                            tooltipManager.add(new Tooltip(ColorUtil.prependColorTag("+" + text, new Color(238, 238, 238))));
+                            tooltipManager.add(new Tooltip(
+                                    ColorUtil.wrapWithColorTag(newPriceFormatted, new Color(238,238,238))
+                                            + ColorUtil.wrapWithColorTag(" (+" + hoveredItemPrice + ")", new Color(238, 238, 0))
+                                            + ColorUtil.wrapWithColorTag("</br>/" + NumberFormat.getNumberInstance(Locale.US).format(client.getOverallExperience()) + " xp", new Color(165, 165, 165))
+                            ));
                         }
                     } else {
-                        if (Long.parseLong(cleanValue) < 0){
-                            tooltipManager.add(new Tooltip(ColorUtil.prependColorTag(text, new Color(190, 0, 0))));
+                        if (Long.parseLong(cleanHovered) < 0){
+                            tooltipManager.add(new Tooltip(
+                                    ColorUtil.wrapWithColorTag(newPriceFormatted, new Color(238,0,0))
+                                            + ColorUtil.wrapWithColorTag(" (" + hoveredItemPrice + ")", new Color(238, 0, 0))
+                                            + ColorUtil.wrapWithColorTag("</br>/" + NumberFormat.getNumberInstance(Locale.US).format(client.getOverallExperience()) + " xp", new Color(165, 165, 165))
+                            ));
                         } else {
-                            tooltipManager.add(new Tooltip(ColorUtil.prependColorTag("+" + text, new Color(190, 0 , 0))));
+                            tooltipManager.add(new Tooltip(
+                                    ColorUtil.wrapWithColorTag(newPriceFormatted, new Color(238,0,0))
+                                            + ColorUtil.wrapWithColorTag(" (+" + hoveredItemPrice + ")", new Color(238, 0, 0))
+                                            + ColorUtil.wrapWithColorTag("</br>/" + NumberFormat.getNumberInstance(Locale.US).format(client.getOverallExperience()) + " xp", new Color(165, 165, 165))
+                            ));
                         }
                         removeEquipOption(entry);
                     }
-                    tooltipManager.add(new Tooltip(ColorUtil.prependColorTag(NumberFormat.getNumberInstance(Locale.US).format(plugin.getWornItemsValue()) + "/" + NumberFormat.getNumberInstance(Locale.US).format(client.getOverallExperience()) + " XP", new Color(238, 238, 238))));
                 }
         }
     }
@@ -128,7 +149,7 @@ public class BudgetOverlay extends Overlay {
         if (item != null) {
 
             String formattedNumber = NumberFormat.getNumberInstance(Locale.US).format(getHoveredPriceDifference(item));
-            return formattedNumber + " GP";
+            return formattedNumber + "gp";
         }
 
         return null;
