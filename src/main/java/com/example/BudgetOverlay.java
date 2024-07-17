@@ -152,6 +152,5 @@ public class BudgetOverlay extends Overlay {
             }
         }
         client.setMenuEntries(cleaned.toArray(new MenuEntry[0]));
-
     }
 }
