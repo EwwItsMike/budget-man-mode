@@ -18,6 +18,7 @@ import net.runelite.http.api.item.ItemStats;
 import javax.inject.Inject;
 import java.awt.*;
 import java.text.NumberFormat;
+import java.util.ArrayList;
 import java.util.Locale;
 
 // Base code sourced from Item Prices plugin
@@ -93,6 +94,7 @@ public class BudgetOverlay extends Overlay {
                     } else {
                         tooltipManager.add(new Tooltip(ColorUtil.prependColorTag(text, new Color(190, 0 , 0))));
                         // TODO: remove equip/wield option on the item (or set first option to USE)
+                        removeEquipOption(entry);
                     }
                 }
         }
@@ -138,5 +140,18 @@ public class BudgetOverlay extends Overlay {
     private int getItemPriceFromContainer(ItemContainer container, int slotID) {
         final Item item = container.getItem(slotID);
         return item != null ? itemManager.getItemPrice(item.getId()) * item.getQuantity() : 0;
+    }
+
+    private void removeEquipOption(MenuEntry entry) {
+        MenuEntry[] entries = client.getMenuEntries();
+        ArrayList<MenuEntry> cleaned = new ArrayList<>();
+
+        for (MenuEntry e : entries){
+            if (e.getIdentifier() != entry.getIdentifier()){
+                cleaned.add(e);
+            }
+        }
+        client.setMenuEntries(cleaned.toArray(new MenuEntry[0]));
+
     }
 }
