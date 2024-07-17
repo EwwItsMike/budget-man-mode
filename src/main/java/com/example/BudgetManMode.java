@@ -107,8 +107,6 @@ public class BudgetManMode extends Plugin
 		}
 		if (container == null) return;
 
-
-
 		for (MenuEntry e : entries) {
 			final int index = e.getParam0();
 			final Item item = container.getItem(index);
@@ -123,6 +121,8 @@ public class BudgetManMode extends Plugin
 				System.out.println("Adding entry to cleaned");
 
 			}
+
+			System.out.println("---");
 		}
 		client.setMenuEntries(cleaned.toArray(new MenuEntry[0]));
 	}
@@ -134,5 +134,9 @@ public class BudgetManMode extends Plugin
 
 	public long getRemainingAllowedValue(){
 		return maxAllowedValue - wornItemsValue;
+	}
+
+	public long getWornItemsValue(){
+		return wornItemsValue;
 	}
 }

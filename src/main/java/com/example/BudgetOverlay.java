@@ -96,9 +96,14 @@ public class BudgetOverlay extends Overlay {
                             tooltipManager.add(new Tooltip(ColorUtil.prependColorTag("+" + text, new Color(238, 238, 238))));
                         }
                     } else {
-                        tooltipManager.add(new Tooltip(ColorUtil.prependColorTag("+" + text, new Color(190, 0 , 0))));
+                        if (Long.parseLong(cleanValue) < 0){
+                            tooltipManager.add(new Tooltip(ColorUtil.prependColorTag(text, new Color(190, 0, 0))));
+                        } else {
+                            tooltipManager.add(new Tooltip(ColorUtil.prependColorTag("+" + text, new Color(190, 0 , 0))));
+                        }
                         removeEquipOption(entry);
                     }
+                    tooltipManager.add(new Tooltip(ColorUtil.prependColorTag(NumberFormat.getNumberInstance(Locale.US).format(plugin.getWornItemsValue()) + "/" + NumberFormat.getNumberInstance(Locale.US).format(client.getOverallExperience()) + " XP", new Color(238, 238, 238))));
                 }
         }
     }
@@ -111,6 +116,11 @@ public class BudgetOverlay extends Overlay {
             container = client.getItemContainer(InventoryID.INVENTORY);
         }
 
+        ItemStats stats = itemManager.getItemStats(entry.getItemId(), false);
+        if (!stats.isEquipable()) {
+            return null;
+        }
+
         if (container == null) return null;
 
         final int index = entry.getParam0();
@@ -118,7 +128,7 @@ public class BudgetOverlay extends Overlay {
         if (item != null) {
 
             String formattedNumber = NumberFormat.getNumberInstance(Locale.US).format(getHoveredPriceDifference(item));
-            return  formattedNumber + " GP";
+            return formattedNumber + " GP";
         }
 
         return null;
@@ -150,9 +160,12 @@ public class BudgetOverlay extends Overlay {
         ArrayList<MenuEntry> cleaned = new ArrayList<>();
 
         for (MenuEntry e : entries){
-            if (e.getIdentifier() != entry.getIdentifier()){
+            System.out.println("Checking entry: " + e.getOption());
+            if ((!e.getOption().equalsIgnoreCase("wear") && !e.getOption().equalsIgnoreCase("wield"))){
                 cleaned.add(e);
+                System.out.println("Adding entry to cleaned");
             }
+            System.out.println("---");
         }
         client.setMenuEntries(cleaned.toArray(new MenuEntry[0]));
     }
